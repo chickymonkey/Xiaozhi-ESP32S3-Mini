@@ -166,7 +166,9 @@ media_player:
       num_channels: 1
     files:
       - id: boot_chime
-        file: sounds/boot_chime.wav   # path relative to this YAML
+        # Downloaded from the GitHub repo at compile time - no need to copy
+        # the WAV into the ESPHome config folder.
+        file: https://raw.githubusercontent.com/chickymonkey/Xiaozhi-ESP32S3-Mini/main/boot_chime.wav
     # TTS (voice assistant replies + HA tts/announce) -> blink cyan
     on_announcement:
       - light.turn_on:

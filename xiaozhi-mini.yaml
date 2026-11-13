@@ -25,9 +25,16 @@ esphome:
     - priority: -100
       then:
         - script.execute: led_idle
-        # Play a short chime 2s after boot. Until the I2S speaker has
+        # Play a short chime once boot has settled. Until the I2S speaker has
         # started once, the amp hisses/buzzes; playing audio fixes it.
-        - delay: 2s
+        # Wait for WiFi and the HA connection first: connecting is CPU-heavy
+        # and cuts up audio that starts in the middle of it (the S2 speaker
+        # gets the same effect from its 3 s delay).
+        - wait_until:
+            condition:
+              api.connected:
+            timeout: 10s
+        - delay: 3s
         - media_player.speaker.play_on_device_media_file:
             media_file: boot_chime
             announcement: true
@@ -151,7 +158,9 @@ speaker:
     sample_rate: 48000
     bits_per_sample: 16bit
     channel: mono
-    buffer_duration: 100ms
+    # 100 ms leaves no margin when another task (WiFi, API) holds the CPU;
+    # the S2 speaker uses 800 ms. 500 ms is ~48 KB at 48 kHz mono.
+    buffer_duration: 500ms
 
 media_player:
   - platform: speaker
